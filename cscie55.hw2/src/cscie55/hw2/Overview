@@ -1,0 +1,287 @@
+/**                                                    -----------SUMMARY----------
+*
+*    This Java program is a continuation of homework #1 in that we are adding two object types to compliment the elevator system - Building and Floor.  Both objects 
+*    interact with the Elevator to meet the required specification. The Elevator and all of the Floors are part of a Building. The Elevator moves passengers between 
+*    Floors like we had in homework #1, but now limits the number of passengers it can carry. It signifies this by throwing an exception if an attempt is made to 
+*    board passengers past its limit. This homework makes use of FindBugs, a static code tool for finding bugs in Java code. It also uses Unit Testing with JUnit, 
+*    which is a self testing code that verifies required functionality of the Java code replacing the main(String[] args)method we had in homework #1. This text 
+*    gives a description of how i solved the homework #2 - including all assumptions made, classes created and how to execute the solution. By walking through this 
+*    text, anyone with little or no Java knowledge should be able to replicate the same result. 
+*
+*   
+
+*
+*                                               -------REQUIREMENTS FOR THE HOMEWORK #2-----------
+*    
+*    The Elevator moves exactly as it did last time, stopping at Floors to disembark passengers, and to pick up new passengers. But now, if a passenger tries to board 
+*    the Elevator when it is already loaded to capacity, an ElevatorFullException will be thrown. That should prevent the passenger from boarding. The Elevator will 
+*    pick up the passengers that could not be accommodated when it next visits the Floor. Remember that in Homework 1 the Elevator class had an array of flags (one per
+*    floor) indicating if a stop was needed on that floor. That flag should remain set if not all passengers could board the Elevator. But if all passengers waiting 
+*    could board, the flag can be cleared.
+*         
+*
+*                                                      --------Code organization -----------
+*
+*    The Elevator, Floor and Building classes all go into the package cscie55.hw2. If you define any additional classes, they should also go into this package 
+*    (and should not be declared public). The Elevator class Your code should be structured something like this:
+*
+*       src/
+*           cscie55/
+*                   hw2/
+*                       Building.java
+*                       Elevator.java
+*                       ElevatorFullException.java
+*                       Floor.java
+*                       Overview
+*       test/
+*           cscie55/
+*                   hw2test/
+*                           HW2ElevatorSimulationTest.java
+*                           
+*                                                                                 
+*                                             ------------Modification to the Elevator class-------------
+*    In addition to the methods and fields in homework the following were also required:
+*     - int currentFloor(): Return the elevator's current floor number. I.e., this is the number of the floor reached by the last call to Elevator.move().
+*     - int passengers(): Return the number of passengers currently on the elevator.
+*     - void boardPassenger(int destinationFloorNumber) throws ElevatorFullException: Board a passenger who wants to ride to the indicated floor. Note that this method 
+*       boards a single passenger and may throw an ElevatorFullException. 
+*     - Elevator.CAPACITY is a final static field that stores the number of passengers that the elevator can accommodate. Set it to 10.
+*     - Replace the Elevator() constructor by Elevator(Building building). 
+*       
+*       (Hint: You may find it useful to record the building in a new field of Elevator.)
+*
+*
+*                                                   -----------The Floor class-----------------
+*    This is a new class, representing one of the floors that the Elevator can visit. It should have the following public methods:
+*    int passengersWaiting(): Returns the number of passengers on the floor who are waiting for the elevator.
+*    void waitForElevator(): Called when a passenger on the floor wants to wait for the elevator. Calling this should cause the elevator to stop the next time it 
+*    moves to the floor. For this homework assume that passengers waiting for the elevator on floors 2 and above should all be boarded as going to the first floor. 
+*    (We'll drop this assumption in the next homework.) Floor(Building building, int floorNumber): The Floor constructor. You will need to decide what fields the 
+*    Floor class should have. Note that to meet the first two requirements a Floor object must retain a piece of state that records the number of passengers it has 
+*    waiting for an Elevator.
+*
+*
+*                                                   ----------The Building class------------
+*
+*    This is a new class, which keeps track of one Elevator and multiple Floors. It provides access to these objects for tests. Building has the following public 
+*    methods and fields. Elevator elevator(): Returns the building's Elevator Floor floor(int floorNumber): Returns the Floor object for the given floor number.
+*    FLOORS: A static final field storing the number of floors in the building. Set the value to 7.
+*    Building(): The Building constructor creates an Elevator, and one floor for each floor number. (Move the FLOORS variable, that was in the Elevator class in 
+*    homework 1 to the Building class.) These specifications are requirements. As such, they specify things that must be done in any correct implementation. You are, 
+*    of course, free to add other methods (as long as they are not public) and any fields (that should probably not be public).
+*
+*
+*
+*                                                ---------The ElevatorFullException class-------
+*
+*    - This needs to be a public class, extending java.lang.Exception.
+*    - ElevatorFullException, like any other exception, must be thrown when something out of the ordinary happens. Because we do not want this exception to end execution 
+*      of your program, some other code must catch ElevatorFullException and handle the situation, (i.e., that the elevator cannot board a passenger when it is full).
+*    - In this case, Elevator.boardPassenger(int destinationFloorNumber) throws ElevatorFullException when the elevator is already at capacity.
+*    - Elevator.boardPassenger(int destinationFloorNumber) is called when the Elevator stops on a floor, some passengers leave, and the passengers waiting on that floor 
+*      try to board. This code must catch the exception, e.g.
+*
+*                   try {
+*                         ...
+*                          elevator.boardPassenger(...); // May throw ElevatorFullException
+*                          // The passenger boarded successfully
+*                         ...
+*                       } catch (ElevatorFullException e) {
+*                          // The passenger was unable to board because the elevator is full.
+*                         ...
+*                       }
+*
+*    As before, submit the output you get when you run your program. If all goes well, there should be minimal output, e.g.
+*
+*                   JUnit version 4.11
+*                    ....
+*                   Time: 0.006
+*
+*                   OK (4 tests)
+*                
+*    If you don't see something like this, and there is output indicating tests failing, and containing stack traces, then tests are failing. Figure out what's going 
+*    wrong and keep debugging until you get a clean run. 
+*
+*
+*
+*
+*	                                      ----------PROGRAM LOGIC FLOW AND MY THOUGHT PROCESS-----------
+*
+*    You should define the passenger constructor so it can pass the test.
+*       
+*    As mention previously in the summary section, I am making use of a self testing code with JUnit to ensure that our code function as required in checking 
+*    that the elevator moves up and down without boarding any passengers. An HW2ElevatorSimulationTest class was provided to use with the self-testing framework 
+*    (JUnit). Some of the fields and methods in my Elevator class and those created in the new classes were modified to mirror the HW2ElevatorSimulationTest class.
+*      In other words, i inferred some of requirements from the HW2ElevatorSimulationTest class to make the code pass. This is known as test driven requirements. 
+*       
+*    - The HW2ElevatorSimulationTest class imports all created classes their member fields and methods. This class has 4 void methods that run the checks. They are 
+*      the elevatorMotion, disembark, call, elevatorFull and the checkElevator methods. 
+*
+*	 - The elevatorMotion moves the elevator. This is achieved by first instantiating the Building class, and initializing same with a no argument constructor that 
+*      creates an elevator and a floor for each floor number objects.  Indexes of an array where used to represent the 7 floors and a For Loop use to iterate through 
+*      the elements of the array creating 7 floor objects for each floor number. The Building objects returns an elevator object using the Elevator elevator() method.
+*      The While Loop is then used to move the elevator using the elevator.move() as long as the expectedFloorNumber is 1 and less than static final FLOOR of the 
+*      Building Object. For each move of the elevator the expectedFloorNumber is incremented by 1 and the checkElevator methods is called to check if expected value of 
+*      the elevator, floor number and passengers on the elevator matches the actual values.
+*      
+*    - The disembark method instantiates the Building class creating 7 floors and the elevator objects, but adds passengers and disembarks them on the way up using the  
+*      boardPassenger method of the elevator object. This method also throws ElevatorFullException if passengers on the elevator is equal to or greater than the capacity 
+*      of the elevator. For each move of the elevator to a floor the checkElevator methods is called to check if expected value of the elevator, floor number and passengers 
+*      on the elevator matches the actual values.
+*      
+*    - The call method check that pass passengers on higher floors can call and board the elevator, and then disembark on the ground floor. This is achieved by calling 
+*      the floor method which returns the floor objects for each floors using the indexes in the array and in turn the waitForElevator method of the specified floor 
+*      object. For each move of the elevator to a floor the checkElevator methods is called to check if expected value of the elevator, floor number and passengers on 
+*      the elevator matches the actual values.
+*      
+*    - The elevatorFull method basically uses the checkElevator method to check handling of a full elevator. It does that by having people waiting on the 4th floor to 
+*      exceed elevator by 50%, then moving the elevator to the 4th floor and checking the state. It fills the elevator to capacity and leaves the remaining passengers 
+*      on floor 4 and goes to ground floor and then back to floor 4 checking state of the elevator with each move.
+*        
+*		 
+*
+*	
+*	                                           ------ASSUMPTIONS MADE IN THE DESIGN------
+*	
+*	 - That all passengers waiting in floor number 2 and above are destined for floor number 1.  
+*    - The ith elements of the array used are sized and mapped to the i - 1 cell to avoid indexing errors  
+*     		
+*
+*
+*	                                     -----------CLASSES, FIELDS AND METHODS CREATED-------------
+*
+*	 In addition to all required member fields and methods for this homework and those carried over from homework #1, I created an addWaitingPassengers() method to help 
+*    my code pass the test. This method check if passengers are able to board the elevator, else throws an Elevator Full Exception. For this homework, i used  the system 
+*    System.out.println for debugging purposes to see the runs of the code. This replaced the use of a debugger or a toString method for same. A toString method will be 
+*    considered in future homework(s). A printout of the console for the program is as follows:
+*
+*                                               Current Floor is:1
+*                                               Ascending to2
+*                                               Current Floor is:2
+*                                               Ascending to3
+*                                               Current Floor is:3
+*                                               Ascending to4
+*                                               People waiting at floor:4is 15
+*                                               Exception thrown
+*                                               Current Floor is:4
+*                                               Ascending to5
+*                                               Current Floor is:5
+*                                               Ascending to6
+*                                               Current Floor is:6
+*                                               Ascending to7
+*                                               Current Floor is:7
+*                                               Current Floor is:7
+*                                               Descending to6
+*                                               Current Floor is:6
+*                                               Descending to5
+*                                               Current Floor is:5
+*                                               Descending to4
+*                                               People waiting at floor:4is 5
+*                                               Exception thrown
+*                                               Current Floor is:4
+*                                               Descending to3
+*                                               Current Floor is:3
+*                                               Descending to2
+*                                               Current Floor is:2
+*                                               Descending to1
+*                                               Stopping at floor1
+*                                               Current Floor is:1
+*                                               Current Floor is:1
+*                                               Ascending to2
+*                                               Current Floor is:2
+*                                               Ascending to3
+*                                               Current Floor is:3
+*                                               Ascending to4
+*                                               People waiting at floor:4is 5
+*                                               Current Floor is:1
+*                                               Current Floor is:1
+*                                               Ascending to2
+*                                               Current Floor is:2
+*                                               Ascending to3
+*                                               Stopping at floor3
+*                                               Current Floor is:3
+*                                               Ascending to4
+*                                               Stopping at floor4
+*                                               Current Floor is:4
+*                                               Ascending to5
+*                                               Current Floor is:5
+*                                               Ascending to6
+*                                               Stopping at floor6
+*                                               Current Floor is:6
+*                                               Ascending to7
+*                                               Current Floor is:1
+*                                               Current Floor is:1
+*                                               Ascending to2
+*                                               Current Floor is:2
+*                                               Ascending to3
+*                                               People waiting at floor:3is 2
+*                                               Current Floor is:3
+*                                               Ascending to4
+*                                               Current Floor is:4
+*                                               Ascending to5
+*                                               Current Floor is:5
+*                                               Ascending to6
+*                                               People waiting at floor:6is 3
+*                                               Current Floor is:6
+*                                               Ascending to7
+*                                               Current Floor is:7
+*                                               Current Floor is:7
+*                                               Descending to6
+*                                               Current Floor is:6
+*                                               Descending to5
+*                                               Current Floor is:5
+*                                               Descending to4
+*                                               Current Floor is:4
+*                                               Descending to3
+*                                               Current Floor is:3
+*                                               Descending to2
+*                                               Current Floor is:2
+*                                               Descending to1
+*                                               Stopping at floor1
+*                                               Current Floor is:1
+*                                               Current Floor is:1
+*                                               Ascending to2
+*                                               Current Floor is:2
+*                                               Ascending to3
+*                                               Current Floor is:3
+*                                               Ascending to4
+*                                               Current Floor is:4
+*                                               Ascending to5
+*                                               Current Floor is:5
+*                                               Ascending to6
+*                                               Current Floor is:6
+*                                               Ascending to7
+*                                               Current Floor is:7
+*                                               Current Floor is:7
+*                                               Descending to6
+*                                               Current Floor is:6
+*                                               Descending to5
+*                                               Current Floor is:5
+*                                               Descending to4
+*                                               Current Floor is:4
+*                                               Descending to3
+*                                               Current Floor is:3
+*                                               Descending to2
+*                                               Current Floor is:2
+*                                               Descending to1
+*
+*
+*
+*	                                        --------HOW TO EXECUTE THE PROGRAM---------
+*    
+*    I used the Eclipse IDE for coding, and It already knows how to run the JUnit tests. So all i did was download the test code that as the class of Java code of 
+*    cscie55.hw2test.HW2ElevatorSimulationTest and created a new run configuration then selecting JUnit4. A PDF of the JUnit output result runs are attached as part 
+*    of my homework submission.
+* 
+*    The program can also be executed through the terminal by first downloading two jar files - hamcrest-core-1.3.jar and junit-4.11.jar, and including them in your 
+*    classpath. Put these jar files somewhere convenient include both these jar files as well as directions to the classes in your src and test directories. This makes 
+*    four separate paths in your classpath, one each explicitly for the jar files, and separate paths to locate the class files in the two packages. Because you are 
+*    running a junit test, the class you run is org.junit.runner.JUnitCore. There is one argument, the name of the test, 
+*    cscie55.hw2test.HW2ElevatorSimulationTest. Depending on your environment and the classpath your command for that should look like this:
+*     
+*    java -classpath "/Users/jao/jars/junit-4.11.jar:/Users/jao/jars/hamcrest-core-1.3.jar:/Users/jao/teaching/cscie55/spring2014/hw2/out/test/hw2:/Users/jao/teaching/cscie55/spring2014/hw2/out/production/hw2" org.junit.runner.JUnitCore cscie55.hw2test.HW2ElevatorSimulationTest
+*
+*	 NOTE: THIS WILL VARY DEPENDING ON YOUR ENVIRONMENT AND WHERE YOUR JAR FILES ARE LOCATED ON YOUR MACHINE. 
+*
+*/
+

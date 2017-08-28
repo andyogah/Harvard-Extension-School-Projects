@@ -1,0 +1,105 @@
+/**
+*	
+*                                                     -----------SUMMARY----------
+*
+*    This Java program simulates the elevator system of a building. In essence it strives to give a description of how i solved the homework #1.
+*    It includes all assumptions made, classes i created and how to execute the solution. By walking through this text, anyone with little or no Java  
+*    knowledge should be able to replicate the same result. 
+*
+*   
+*
+*                                               -------REQUIREMENTS FOR THE HOMEWORK #1-----------
+*    
+*    - Create an Elevator class in the package cscie55.hw1.elevator 
+*    - Create a no-argument constructor in the class that sets up the elevator's state.
+*    - Define a static final field for the number of floors in the building and set it to 7. Use it where appropriate.
+*    - Define fields for tracking the elevator's current floor, the direction of travel.
+*    - Define array-valued fields for tracking the number of passengers  destined for each floor and whether a stop is required for that floor.
+*    - Define a move() method which, when called, modifies the Elevator's state, (i.e., updates the fields appropriately):
+*        - Modifies the current floor.
+*        - Modifies the direction of travel, if the ground floor or top floor has been reached.
+*        - Clears the array entry tracking the number of passengers destined for the floor that the elevator has just arrived at.
+*        - Clears the array entry indicating that a stop is required on the floor that the elevator has just arrived at.
+*    - Define a boardPassenger(int floor) method which adds to the elevator a passenger destined for the indicated floor.
+*    - Define a toString() method to aid in debugging and testing. The String returned by toString() should indicate the number of passengers on board, 
+*      and the current floor.
+*	
+*	To demonstrate that your Elevator class is working properly, create an ElevatorTest class in the package cscie55.hw1.elevatortest. 
+*    The main() method in this class should do the following:
+*   - Create an Elevator object.
+*   - Board two passengers for the 3nd floor, and one for the 5th floor.
+*   - Move the Elevator from the ground floor to the top floor, and then back to the ground floor.
+*   - Print the state of the elevator before the first move, and after each move. The output should look like this:
+*
+*                                  Floor 1: 3 passengers
+*                                  Floor 2: 3 passengers
+*                                  Floor 3: 1 passenger
+*                                  Floor 4: 1 passenger
+*                                  Floor 5: 0 passengers
+*                                  Floor 6: 0 passengers
+*                                  Floor 7: 0 passengers
+*                                  Floor 6: 0 passengers
+*                                  Floor 5: 0 passengers
+*                                  Floor 4: 0 passengers
+*                                  Floor 3: 0 passengers
+*                                  Floor 2: 0 passengers
+*                                  Floor 1: 0 passengers
+*	
+*
+*
+*	                                      ----------LOGIC OF THE PROGRAM FLOW-----------
+*
+*
+*   - The ElevatorTest class imports the Elevator class and all its member fields and methods
+*
+*	- The Elevator class is instantiated in the main() method and initialized by a no argument constructor that sets the number of passengers and current floor 
+*     to 0. All other member fields of the elevator use the built-in default values 
+*
+*	- The elevator object get loaded with passengers via boardPassenger(int floor) method using specified values. The parameters passed to boardPassenger method 
+*     is the destination for each passenger and is derived when the elevator button is pushed
+*
+*	- The input parameter from boardPassenger gets stored in an array field called destination_request[]. This array tracks the number of passengers destined for 
+*     each floor and whether a stop is required for that floor. The indexes of the array corresponds to each of the floors. It is such that the value of each 
+*	  indexes increase as passengers request a floor and decreases when they get off the elevator on same floor
+*
+*	- The program uses a for loop to call move(), a member method of Elevator object that moves the elevator from floor to floor, changing directions when it 
+*     reaches the top or bottom. 
+*
+*	- If a passenger requests a particular floor in the destination_requests[] array, the move() method first calls a stop() method for that floor before 
+*     incrementing the current_floor field, else current_floor field will continually increment.
+*
+*	- The stop() method calls the dischargePassengers() method, which unloads passengers destined for the requested floor. After which, the dischargePassenger() 
+*     method returns the flow of the program to the move()method in the main() method to resume the for loop.
+*	
+*	- When the iteration of the for loop cycles are exhausted, the program stops. 
+*
+*   - The toString() method was used to display number of passengers on each floors as the move() methods ascends and descends the elevator
+*		 
+*
+*	
+*	                                     ------ASSUMPTIONS MADE IN THE DESIGN------
+*	
+*	- That there is no limit to the amount of passengers in the elevator.  
+*   - All passengers are loaded from floor 1, before the elevator starts its motion. Necessary adjustment was made to the current floor field in the array 
+*     field to accommodate this. 
+*   
+*		
+*
+*
+*	                                     -----------CLASSES, FIELDS AND METHODS CREATED-------------
+*
+*	In addition to all required member fields and methods created for the Elevator and ElevatorTest classes in their respective packages, i created the 
+*   stop() method  and dischargePassengers() to both work with the move() method in the Elevator class to meet requirement of the program flow. 
+*   A changeDirection() method was also defined that operated on the boolean ascending field and the move() to change the direction of the elevator on reaching 
+*   the top floor so as to descend to the ground floor 
+*
+*
+*
+*	                                        --------HOW TO EXECUTE THE PROGRAM---------
+*
+*  The program can be executed through the terminal by executing the commands: java -cp hw1.jar cscie55.hw1.elevatortest.ElevatorTest 
+*
+*	
+*
+*/
+
