@@ -1,0 +1,28 @@
+A synchronized block in Java is generally more expensive in terms of performance because of the rules involving cache 
+flushing and invalidation and the way object locks are implemented using an atomic test and set bit instructions in the 
+JVM. Even when a program contains only a single thread running on a single processor, a synchronized call is still 
+slower than an unsynchronized call. If the synchronization actually requires contending for the lock amongst threads 
+as we have in this homework, the performance penalty is substantially greater, as there will be several thread switches 
+and system calls required.
+
+Synchronized blocks are not only used for concurrency, but also for visibility. Every synchronized block is a memory 
+barrier: the JVM is free to work on variables in registers, instead of main memory, on the assumption that multiple 
+threads will not access that variable. Without synchronization blocks, this data could be stored in a CPU's cache and 
+different threads on different CPUs would not see the same data. By using a synchronization block, you force the JVM 
+to write this data to main memory for visibility to other threads.
+
+Obviously a single thread program will not have other threads stalled while waiting for object lock to be freed up, but 
+will still have issues with cache coherency. So even though you're free from lock contention, the JVM will still have 
+to do housekeeping in flushing data from main memory. In addition, this has optimization constraints. The JVM is free to 
+reorder instructions in order to provide optimization.
+
+All these add up to making synchronized block or code performance more expensive than unsynchronized one. Although JVM has 
+undergone tremendous improvement over the years, performance comparison between both is still quantifiable as exemplified 
+by the results of this home work as shown below:
+
+Command INSIDE monitor:  0.755705 txns/msec
+Command OUTSIDE monitor: 3.534201 txns/msec
+
+Command inside monitor uses synchronized block, while the command outside the monitor does not. This shows the former having
+lesser transactions completed in the same time frame as the latter. 
+

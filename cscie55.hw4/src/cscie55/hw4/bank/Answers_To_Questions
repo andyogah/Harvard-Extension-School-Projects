@@ -1,0 +1,46 @@
+
+
+
+                                      ------ANSWERS TO QUESTIONS REGARDING TESTPERFORMANCE OUTPUT-------
+                                      
+    To answer these questions, i will extend the example given in class:
+    
+    "You may think of synchronized methods as guarded by a doorway with a lock on the door. When no one is inside, the key is under the mat. You, a running 
+    thread, approach the door, take the key from under the mat, enter through the door, and lock the door from inside. When you leave you put the key back 
+    under the mat. If you come to the door and the key is not under the mat, you must wait until the current occupant comes out and returns the key to its 
+    place under the mat."
+    
+    Now let's say we are loading a U-Haul truck from the house in that example and the house itself is the Bank object, and rooms contained in it are the 
+    Account objects. LOCK_BANK is locking the front/main entrance, LOCK_ACCOUNTS is locking the doors to individual rooms, and NO_LOCKING is living all the 
+    doors open. The Movers are the threads and you are waiting in the truck keeping track of what is being moved and have a time frame to get that done. Let
+    us say the doors are locked for authentication purpose, so you know who moved what and pay them accordingly.  
+
+ 1: Why does the NO_LOCKING test succeed for one thread and fail for 2-20 threads? (It is possible that you will see some successes for larger number of 
+    threads. But if you see no failures, then something is amiss.)
+
+    NO_LOCKING succeeds with one thread simply because there are no other threads competing for the JVM monitor object. So, only one thread will access 
+    the object(s) at a time. However, multiple threads accessing the objects at a time with no concurrency or synchronization will create a conflict scenario,
+    as each thread may return or have different perspectives of states of object(s). It is very possible to see successes with larger number of threads, but 
+    failures are expected. In the extended class example, having one person move items in and out will work because you can easily keep track, but is 
+    inefficient because you'd wait all day. Mover gets tired and calls his buddies (about 9 of them) to help. Moving will get faster, you may still be able 
+    to track some items, but since you have items moved at the same time, you are bound to lose track or get items misplaced in the truck amounting to failure. 
+
+
+ 2: How do you explain the change in performance for LOCK_BANK as threads increase from 1 to 20.
+
+    The performance for LOCK_BANK decreases as the threads increase from 1 to 20, because the number of transactions reduces with time. In this case only one 
+    thread can do a transfer at any given moment in the Bank. If a thread gets a hold of the Bank object and locks the JVM monitor, all other threads will have 
+    to wait for the monitor to be unlocked causing reduction in performance. This is similar to having the front entrance locked my the mover as he goes in and 
+    out of the house. Imagine you now have more than one mover and each of them now have to wait for the other to get done and provide the key to get in. The 
+    more movers you have the more time waited and used, and the lesser the items moved within the given time frame. 
+    
+          
+ 3: How does the performance of LOCK_BANK compare to that of LOCK_ACCOUNTS? How do you explain this? 
+ 
+    performance for LOCK_ACCOUNTS increases with time as the number of thread increases. This is opposite of the case for LOCK_BANK. The reason being a Lock on
+    a method with an account doesn't mean you can't access other non-synchronized methods with accounts. Also, greater concurrency provided by synchronizing the
+    two Accounts would be such that threads not touching the two Accounts will not be blocked. Looking at our U-Haul example again, If the front door is open and
+    some rooms are locked by a mover, other movers can still get in and access other rooms. Each movers can switch room access when they get done. 
+    Overall performance will improve because more items will be moved or transferred within same time frame    
+
+    

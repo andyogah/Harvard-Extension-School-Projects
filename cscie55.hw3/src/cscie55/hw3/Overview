@@ -1,0 +1,146 @@
+/**                                                    -----------SUMMARY----------
+*
+*    This Java program is a continuation of homework #2 in that we are adding a new object called Passenger. Now, instead of tracking counts of passengers, individual 
+*    Passenger objects are tracked. Elevator and Floor will track Passengers in collections, moving Passenger objects from one collection to another as part of the  
+*    simulation. The Elevator still moves passengers between Floors like we had in homework #2, and still limits the number of passengers it can carry by throwing an 
+*    exception if an attempt is made to board passengers past its limit. This homework makes use of FindBugs, a static code tool for finding bugs in Java code. It also 
+*    uses Unit Testing with JUnit, which is a self testing code that verifies required functionality of the Java code replacing the main(String[] args)method. This text 
+*    gives a description of how i solved the homework #3 - including all assumptions made, additional fields and methods created and how to execute the solution. By 
+*    walking through this text, anyone with little or no Java knowledge should be able to replicate the same result. 
+*
+*   
+*
+*                                               -------REQUIREMENTS FOR THE HOMEWORK #3-----------
+*
+*     Floor needs three collections of Passengers:
+*       - Passengers who are resident on the Floor, not waiting for the elevator;
+*       - Passengers who are waiting for an elevator going up;
+*       - Passengers who are waiting for an elevator going down.
+*     A Passenger on a Floor will be in exactly one of these collections.
+*     Elevator needs, for each Floor, a collection of Passengers who intend to disembark on that Floor.
+*     
+*     In previous homeworks, we had a flag for each floor, indicating whether the elevator had to stop there to pick up passengers. Now, this decision has to be based on the 
+*     two queues of passengers on each floor, those going up and those going down. For example, suppose that there are two passengers on floor 3 who want to go up, and four who 
+*     want to go down. An empty elevator stops there on the way up and picks up the two passengers going up. Even though all the going-up passengers could be accommodated, it will
+*     still be necessary to stop on 3 on the way down to pick up the four passengers going down.
+*
+*
+*                                                       --The Passenger class--
+*  
+*     This is a new class which records, a passenger's current floor and destination floor. A Passenger who is resident on a floor has a current floor and an undefined destination. 
+*     A Passenger who is on an elevator has a destination but an undefined current floor. A Passenger who is waiting for an elevator has a current floor (the floor on which he or she 
+*     is waiting), and a destination floor (the floor he or she wants to go to). Passenger has the following public methods:
+*
+*       - int currentFloor(): The Passenger's current floor.
+*       - int destinationFloor(): The Passenger's destination floor.
+*       - void waitForElevator(int newDestinationFloor): Sets the Passenger's destination floor to newDestinationFloor.
+*       - void boardElevator(): Sets the Passenger's current floor to be undefined.
+*       - void arrive(): The Passenger is on an elevator and arrives at his or her destination. Copy the value of the destination floor to the current floor, and set the destination 
+*         floor to be undefined.
+*       - a toString method to aid in debugging.
+*       - A Passenger starts out with current floor = 1 (the ground floor) and the destination floor undefined.
+*        
+*        
+*                                                       --The Elevator class--
+*
+*     Starting with Elevator from Homework 2, add the following public methods:
+*        - boolean goingUp(): Return true if the elevator is going up, false otherwise.
+*        - boolean goingDown(): Return true if the elevator is going down, false otherwise.
+*        - Change the passengers() method to return a Set<Passenger> containing all of the Passengers on the elevator. 
+*
+*
+*                                                        --The Floor class--
+*    Floor should be modified as follows:
+       - The int passengersWaiting() is no longer needed and should be removed (or made non-public, if you need it for your implementation).
+       - The waitForElevator method needs to be modified. Change it to void waitForElevator(Passenger passenger, int destinationFloor). This allows the Floor to know which Passenger is waiting 
+         for the Elevator. And by comparing destinationFloor to the floor number, the Floor class knows whether the Passenger is waiting to go up or down.
+       - Add boolean isResident(Passenger passenger) which returns true if the passenger is resident on the Floor, (i.e., not waiting to go up and not waiting to go down), false otherwise.
+       - Add void enterGroundFloor(Passenger passenger). This method adds a passenger to the Floor's residents.
+*     
+*
+*                                                       --The Building class------------
+*
+*    - Add void enter(Passenger passenger): Simply calls Floor.enterGroundFloor(passenger) for the Floor representing the ground floor.
+*
+*
+*
+*                                                ---------The ElevatorFullException class-------
+*
+*    - This needs to be a public class, extending java.lang.Exception.
+*    - ElevatorFullException, like any other exception, must be thrown when something out of the ordinary happens. Because we do not want this exception to end execution 
+*      of your program, some other code must catch ElevatorFullException and handle the situation, (i.e., like we have in checkWaitingOnFloor method in the Elevator class and caught 
+*      in move method).
+*    
+*                   
+*
+*    As before, submit the output you get when you run your program. If all goes well, there should be minimal output, e.g.
+*
+*                   JUnit version 4.11
+*                    ....
+*                   Time: 0.006
+*
+*                   OK (4 tests)
+*                
+*    If you don't see something like this, and there is output indicating tests failing, and containing stack traces, then tests are failing. Figure out what's going 
+*    wrong and keep debugging until you get a clean run. 
+*       
+*
+*                                                      --------CODE ORGANIZATION-----------
+*
+*    All required classes created and modified are in the package cscie55.hw3. The code are structured as shown below:
+*
+*       src/
+*           cscie55/
+*                   hw3/
+*                       Building.java
+*                       Elevator.java
+*                       ElevatorFullException.java
+*                       Floor.java
+*                       Passenger.java
+*                       JUnit_Output
+*                       Overview
+*       test/
+*           cscie55/
+*                   hw3test/
+*                           HW3ElevatorSimulationTest.java
+*                           
+*                                                               
+*
+*
+*
+*	                                      ----------PROGRAM LOGIC FLOW AND MY THOUGHT PROCESS-----------
+*
+*      For this homework, it makes sense to use a form of ArrayList of ArrayList for the passengers in the elevator going to each floor, since we are tracking collection or set 
+*      of passenger objects in the elevator for each floor. This is similar to an Array of Array, but different in that the attribute of collections hold. This replaces the array
+*      used in the previous homework that tracked the passenger count on each floor. This field is defined in the elevator class, and used in the checkWaitingOnFloor method, move 
+*      method and the dischargePassengers method. I also used the concept of ArrayList clone in the checkWaitingOnFloor method to help keep a copy of the reference to the ArrayList,
+*      while carrying out iteration on the original copy of the ArrayList.
+*                 
+**      
+*	
+*	                                           ------ASSUMPTIONS MADE IN THE DESIGN------
+*	
+*	 - That all passengers board from the ground floor  
+*    
+*     		
+*
+*	                                     -----------CLASSES, FIELDS AND METHODS CREATED-------------
+*
+*	 In addition to all required member fields and methods for this homework and those carried over from homework #2, I created a checkWaitingOnFloor() method that checks if a 
+*    passenger object is waiting on each floor ready to board. To work with that i created a  passengerCount field for those waiting to board. This is compared with the elevator 
+*    capacity ensuring no one boards when elevator is full by throwing an elevator full exception. 
+*
+*    It was not specifically stated in the homework requirement that a console printout of the elevator motion is required as part of the homework submission. So, i was not sure if
+*    that was necessary. I only used the toString() method together with the debugger in Eclipse for debugging as stated in the specification for the Passenger class.                                            
+*
+*
+*	                                        --------HOW TO EXECUTE THE PROGRAM---------
+*    
+*    I used the Eclipse IDE for coding, and It already knows how to run the JUnit tests. So all i did was download the test code that as the class of Java code of 
+*    cscie55.hw3test.HW3ElevatorSimulationTest and created a new run configuration then selecting JUnit4. A PDF of the JUnit output result runs are attached as part 
+*    of my homework submission. I also used the concept ArrayList clone to help 
+* 
+*    This submission has been tested with no bugs and/or errors. However, FindBugs keeps flagging bugs in the test code. I decided not corrected those as instructed in 
+*    class, since all JUnit runs passed with no errors. 
+*/
+

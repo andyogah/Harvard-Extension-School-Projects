@@ -1,0 +1,2 @@
+Command INSIDE monitor:  0.755705 txns/msec
+Command OUTSIDE monitor: 3.534201 txns/msec

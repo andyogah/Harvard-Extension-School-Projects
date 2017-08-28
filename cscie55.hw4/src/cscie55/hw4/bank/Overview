@@ -1,0 +1,99 @@
+/**                                                    -----------SUMMARY----------
+*
+*    The purpose of this homework is to experiment with synchronizing access to objects shared by multiple threads. It is expected that code be written to simulate a Bank object, 
+*    which manages a set of Accounts objects. Each Account has a balance, and operations are synchronized on them by threads. The only transaction processed by this Bank is the 
+*    transfer of funds from one Account to another. A test program is provided that will create threads. Multiple threads will run these transfer operations simultaneously, such 
+*    that it is possible for the same Account to be accessed simultaneously by different threads. A correct implementation should be such that the total of all Account balances is
+*    the same at the beginning and end of the simulation. Incorrect implementations are likely to fail either by having the beginning and ending balances disagree, or with some 
+*    threads becoming stuck and never completing. This homework makes use of FindBugs, a static code tool for finding bugs in Java code. It also uses Unit Testing with JUnit, which 
+*    is a self testing code that verifies required functionality of the Java code replacing the main(String[] args)method. This text gives a description of how i solved the homework 
+*    #4 - including all assumptions made, additional fields and methods created and how to execute the solution. By walking through this text, anyone with little or no Java knowledge 
+*    should be able to replicate the same result. 
+*
+*
+*                                               -------REQUIREMENTS FOR THE HOMEWORK #4-----------
+*    
+*     --Implement the Account interface--
+*
+*     Copy Account into your project and then define a class implementing this interface, named AccountImpl. Balances are of type long, (you can think of the balance as tracking pennies 
+*     instead of dollars). Your implementation should throw InsufficientFundsException if withdraw attempts to withdraw an amount exceeding the Account's balance.
+*
+*
+*     --Implement the Bank interface--
+*
+*     Copy Bank into your project and then define a class implementing this interface, named BankImpl. There should be three methods doing transfers between accounts:
+*         - transferWithoutLocking just calls withdraw on one account, and deposit on the other, without doing any synchronization. In other words, your implementation of 
+*           BankImpl.transferWithoutLocking should not use the synchronized keyword at all. This is completely wrong, but will give you some idea of what happens when 
+*           synchronization is missing.
+*         - transferLockingBank does the transfer while synchronizing on the Bank object. This means that only one thread can do a transfer at any given moment. While this
+*           approach does not provide any concurrency, it should be correct.
+*         - transferLockingAccounts does the transfer, locking just the two affected Accounts. Your implementation should use the synchronized keyword twice, once on each 
+*           Account. This should provide for greater concurrency, because threads not touching the two Accounts will not be blocked. Think very carefully about how to lock
+*           the two Accounts.
+*        
+*      The supplied test code (cscie55.hw4.Tester) will call these methods to try different locking strategies.
+*
+*      addAccount method adds an Account to the Bank. No two Accounts should have the same id. If an Account is added with a duplicate id, then addAccount must throw 
+*      DuplicateAccountException.
+*
+*         
+*
+*                                                      --------CODE ORGANIZATION-----------
+*
+*    The combined code is structured as shown below:
+*
+*       src/
+*           cscie55/
+*                 hw4/
+*                     bank/
+*                         AccountImpl                   To be written
+*                         Account                       Provided
+*                         BankImpl                      To be written
+*                         Bank                          Provided
+*                         DuplicateAccountException     Provided
+*                         InsufficientFundsException    Provided
+*                         JUnit_Output                  To be written
+*       test/
+*           cscie55/
+*                   hw4/
+*                        Tester                         Provided
+*                           
+* 
+*
+*	
+*	                                           ------ASSUMPTIONS MADE IN THE DESIGN------
+*	
+*	 - It is assumed that the methods addAccount, totalBalances and numberOfAccounts do not require synchronization.
+*
+*
+*	                                     -----------CLASSES, FIELDS AND METHODS CREATED-------------
+*
+*	 No additional classes and  methods were created. However, i did create a Map interface field specifying the A Map interface specifying the keys, values and the 
+*    key-value pairs for the Id and Account respectively to help meet requirement and pass the test. The codes written exemplify test driven requirements. This means
+*    in addition to following the specified requirements, i mirrored the test code. 
+*                                               
+*
+*	                                        --------HOW TO EXECUTE THE PROGRAM---------
+*    
+*    I used the Eclipse IDE for coding, and It already knows how to run the JUnit tests. So all i did was download the test code that has the class of Java code of 
+*    cscie55.cscie55.hw4.Tester and created a new run configuration then selecting JUnit4. A PDF of the JUnit output result runs are attached as part of my homework 
+*    submission.
+* 
+*     You can also run the tests from the command line as follows:
+*
+*   java -classpath $CLASSPATH org.junit.runner.JUnitCore cscie55.hw4.Tester
+*   where $CLASSPATH references all the class files resulting from cscie55.hw4 and cscie55.hw4.bank, and the junit and hamcrest jar files. For example, a CLASSPATH 
+*   looks like this (split up into separate lines for readability):
+*
+*   /home/jao/cscie55/hw4/writeup/out/test/hw4:
+*   /home/jao/cscie55/hw4/writeup/out/production/hw4:
+*   /home/jao/cscie55/hw4/writeup/lib/junit-4.11.jar:
+*   /home/jao/cscie55/hw4/writeup/lib/hamcrest-core-1.3.jar
+*
+*	 NOTE: THIS WILL VARY DEPENDING ON YOUR ENVIRONMENT AND WHERE YOUR JAR FILES ARE LOCATED ON YOUR MACHINE. 
+*
+*   This submission has been tested with no bugs and/or errors. However, FindBugs keeps flagging bugs in test code. I decided not corrected those as instructed in 
+*   class, since all JUnit runs passed with no errors. 
+*
+*/
+
